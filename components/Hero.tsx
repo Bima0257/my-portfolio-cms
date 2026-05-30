@@ -1,0 +1,118 @@
+import Image from "next/image";
+import { createClient } from "@/lib/supabase/server";
+import Icon from "@/components/Icon";
+
+interface Stat {
+  num: number;
+  label: string;
+}
+
+interface AboutData {
+  name: string;
+  expertise: string;
+  tagline: string;
+  description: string;
+  photo: string | null;
+  stats: Stat[];
+}
+
+export default async function Hero() {
+  const supabase = createClient();
+
+  const { data: about } = await supabase
+    .from("abouts")
+    .select("name, expertise, tagline, description, photo, stats")
+    .limit(1)
+    .single<AboutData>();
+
+  const stats = about?.stats ?? [
+    { num: 285, label: "Projects Done" },
+    { num: 190, label: "Happy Clients" },
+    { num: 7, label: "Years Experience" },
+  ];
+
+  const name = about?.name ?? "Bima";
+  const expertise = about?.expertise ?? "Full Stack Developer";
+  const tagline = about?.tagline ?? "— Crafting digital experiences people love";
+  const description =
+    about?.description ??
+    "UI/UX Designer with a passion for clean, purposeful design. I bridge the gap between user needs and business goals through research-driven, aesthetically refined products.";
+  const photo = about?.photo ?? null;
+
+  return (
+    <section
+      id="home"
+      className="min-h-screen flex items-center pt-[72px] relative overflow-hidden"
+    >
+      <div className="absolute w-[500px] h-[500px] rounded-full bg-primary/10 blur-[80px] -top-[100px] -right-[100px] pointer-events-none z-0" />
+      <div className="absolute w-[300px] h-[300px] rounded-full bg-primary-light/20 blur-[80px] bottom-[50px] -left-[80px] pointer-events-none z-0" />
+
+      <div className="max-w-[1160px] mx-auto px-8 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center relative z-10 py-16">
+          <div className="order-2 md:order-1">
+            <div className="reveal d1 inline-flex items-center gap-2 bg-primary-muted text-primary text-[0.8rem] font-semibold tracking-widest px-4 py-[0.45rem] rounded-full mb-6 uppercase">
+              <Icon name="verified" size={16} />
+              {expertise}
+            </div>
+
+            <h1 className="reveal d2 font-display font-extrabold text-on-surface tracking-tight mb-5"
+              style={{ fontSize: "clamp(2.8rem, 5vw, 4.2rem)", lineHeight: 1.1 }}
+            >
+              Hey, I&apos;m<br />
+              <span className="text-primary">{name}</span>
+              <span
+                className="block text-outline font-normal font-body italic mt-2"
+                style={{ fontSize: "clamp(1rem, 1.8vw, 1.2rem)", letterSpacing: 0 }}
+              >
+                {tagline}
+              </span>
+            </h1>
+
+            <p className="reveal d3 text-[1.1rem] text-on-surface-muted max-w-[460px] mb-10 leading-[1.7]">
+              {description}
+            </p>
+
+            <div className="reveal d4 flex flex-wrap gap-4 mb-12">
+              <a
+                href="#projects"
+                className="inline-flex items-center gap-2 bg-primary text-white px-8 py-[0.85rem] rounded-full text-[0.95rem] font-semibold no-underline transition-all duration-200 hover:bg-primary-accent hover:-translate-y-0.5 hover:shadow-primary-glow"
+              >
+                View My Work
+                <Icon name="arrow_forward" size={18} />
+              </a>
+              <a
+                href="#contact"
+                className="inline-flex items-center bg-transparent text-on-surface px-8 py-[0.85rem] rounded-full text-[0.95rem] font-semibold no-underline border-[1.5px] border-outline-variant transition-all duration-200 hover:border-primary hover:text-primary"
+              >
+                Get In Touch
+              </a>
+            </div>
+
+           
+          </div>
+
+          <div className="reveal d3 flex justify-center">
+            <div className="relative w-[420px] h-[500px] max-w-full">
+              <div className="absolute inset-0 rounded-[40px] bg-primary-muted rotate-3" />
+              <div className="relative w-full h-full rounded-[36px] overflow-hidden shadow-hero group">
+                {photo ? (
+                  <Image
+                    src={photo}
+                    alt={`${name} — UI/UX Designer`}
+                    fill
+                    className="object-cover grayscale-[15%] transition-all duration-500 group-hover:grayscale-0"
+                    priority
+                  />
+                ) : (
+                  <div className="w-full h-full bg-primary-muted flex items-center justify-center">
+                    <Icon name="person" size={80} className="text-primary/40" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
