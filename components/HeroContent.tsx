@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Icon from "@/components/Icon";
+import AnimatedLetters from "./AnimatedLetters";
 
 interface Props {
   name: string;
@@ -39,12 +40,14 @@ export default function HeroContent({ name, expertise, tagline, description, pho
               style={{ fontSize: "clamp(2.8rem, 5vw, 4.2rem)", lineHeight: 1.1 }}
             >
               Hey, I&apos;m<br />
-              <span className="text-primary">{name}</span>
+              <span className="text-primary">
+                <AnimatedLetters text={name} />
+              </span>
               <span
                 className="block text-outline font-normal font-body italic mt-2"
                 style={{ fontSize: "clamp(1rem, 1.8vw, 1.2rem)", letterSpacing: 0 }}
               >
-                {tagline}
+                <AnimatedLetters text={tagline} delay={0.5} stagger={0.02} />
               </span>
             </h1>
 
@@ -70,13 +73,17 @@ export default function HeroContent({ name, expertise, tagline, description, pho
           </div>
 
           <div className="reveal d3 flex justify-center">
-            <motion.div
-              className="relative w-[420px] h-[500px] max-w-full"
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <div className="absolute inset-0 rounded-[40px] bg-primary-muted rotate-3" />
-              <div className="relative w-full h-full rounded-[36px] overflow-hidden shadow-hero group">
+            <div className="relative w-[420px] h-[500px] max-w-full">
+              <motion.div
+                className="absolute inset-0 rounded-[40px] bg-primary-muted"
+                animate={{ rotate: [3, 2, 3] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <motion.div
+                className="relative w-full h-full rounded-[36px] overflow-hidden shadow-hero group"
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              >
                 {photo ? (
                   <Image
                     src={photo}
@@ -90,16 +97,12 @@ export default function HeroContent({ name, expertise, tagline, description, pho
                     <Icon name="person" size={80} className="text-primary/40" />
                   </div>
                 )}
-              </div>
+              </motion.div>
 
-              <motion.div
-                className="absolute top-3 left-3 bg-primary text-white rounded-[12px] px-4 py-2.5 shadow-badge z-10 flex items-center gap-2"
-                animate={{ scale: [1, 1.03, 1] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              >
+              <div className="absolute top-3 left-3 bg-primary text-white rounded-[12px] px-4 py-2.5 shadow-badge z-10 flex items-center gap-2">
                 <span className="text-[1.2rem] font-extrabold leading-none">{experience}+</span>
                 <span className="text-[0.7rem] font-semibold leading-tight">Years of<br />Experience</span>
-              </motion.div>
+              </div>
 
               {cvUrl && (
                 <a
@@ -112,7 +115,7 @@ export default function HeroContent({ name, expertise, tagline, description, pho
                   <span className="text-[0.8rem] font-semibold text-on-surface group-hover:text-white transition-colors">Get CV</span>
                 </a>
               )}
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>
