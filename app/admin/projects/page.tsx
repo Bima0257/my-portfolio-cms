@@ -23,6 +23,7 @@ interface Item {
   description: string;
   thumbnail: string | null;
   demo_url: string | null;
+  github_url: string | null;
   gradient: string | null;
   icon: string | null;
   tags: string[] | null;
@@ -88,6 +89,7 @@ export default function ProjectsPage() {
         description: (fd.get("description") as string) || "",
         thumbnail,
         demo_url: (fd.get("demo_url") as string) || null,
+        github_url: (fd.get("github_url") as string) || null,
         gradient: (fd.get("gradient") as string) || "",
         icon: iconValue,
         tags: tagsStr ? tagsStr.split(",").map(t => t.trim()) : [],
@@ -217,6 +219,11 @@ export default function ProjectsPage() {
               <input name="demo_url" defaultValue={editing?.demo_url ?? ""}
                 className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
             </div>
+          </div>
+          <div className="flex flex-col gap-1.5 mb-4">
+            <label className="text-[0.85rem] font-semibold text-on-surface">GitHub URL</label>
+            <input name="github_url" defaultValue={editing?.github_url ?? ""} placeholder="https://github.com/..."
+              className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-[0.85rem] font-semibold text-on-surface">Description</label>

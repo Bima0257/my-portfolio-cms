@@ -16,6 +16,7 @@ interface Project {
   description: string;
   thumbnail: string | null;
   demo_url: string | null;
+  github_url: string | null;
   gradient: string;
   icon: string;
   tags: string[];
@@ -179,9 +180,34 @@ export default function Projects() {
                   <div className='font-display text-[1rem] font-bold mb-1'>
                     {project.title}
                   </div>
-                  <p className='text-[0.875rem] text-on-surface-muted leading-[1.6]'>
+                  <p className='text-[0.875rem] text-on-surface-muted leading-[1.6] mb-4'>
                     {project.description}
                   </p>
+
+                  <div className='flex flex-wrap gap-2'>
+                    {project.demo_url && (
+                      <a
+                        href={project.demo_url}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='inline-flex items-center gap-1.5 bg-primary text-white px-4 py-2 rounded-full text-[0.78rem] font-semibold no-underline transition-all duration-200 hover:bg-primary-accent'
+                      >
+                        <Icon name='open_in_new' size={14} />
+                        Live Site
+                      </a>
+                    )}
+                    {project.github_url && (
+                      <a
+                        href={project.github_url}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='inline-flex items-center gap-1.5 bg-surface-card text-on-surface px-4 py-2 rounded-full text-[0.78rem] font-semibold no-underline border border-outline-variant transition-all duration-200 hover:bg-surface-low'
+                      >
+                        <Icon name='github' size={14} />
+                        GitHub
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -245,17 +271,30 @@ export default function Projects() {
                 {selected.description}
               </p>
 
-              {selected.demo_url && (
-                <a
-                  href={selected.demo_url}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-full text-[0.9rem] font-semibold no-underline transition-all duration-200 hover:bg-primary-accent hover:-translate-y-0.5'
-                >
-                  <Icon name='open_in_new' size={18} />
-                  Visit Live Site
-                </a>
-              )}
+              <div className='flex flex-wrap gap-3'>
+                {selected.demo_url && (
+                  <a
+                    href={selected.demo_url}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-full text-[0.9rem] font-semibold no-underline transition-all duration-200 hover:bg-primary-accent hover:-translate-y-0.5'
+                  >
+                    <Icon name='open_in_new' size={18} />
+                    Visit Live Site
+                  </a>
+                )}
+                {selected.github_url && (
+                  <a
+                    href={selected.github_url}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='inline-flex items-center gap-2 bg-surface-card text-on-surface px-6 py-3 rounded-full text-[0.9rem] font-semibold no-underline border border-outline-variant transition-all duration-200 hover:bg-surface-low hover:-translate-y-0.5'
+                  >
+                    <Icon name='github' size={18} />
+                    View on GitHub
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </div>
