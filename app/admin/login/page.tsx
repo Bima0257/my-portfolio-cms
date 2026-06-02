@@ -5,23 +5,29 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "../_components/Toast";
 
-const MAX_ATTEMPTS = 3;
-const BASE_COOLDOWN = 30;
+const MAX_ATTEMPTS = 5;
+const COOLDOWN_SECONDS = 120;
+
+function formatCooldown(s: number): string {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+}
 
 function getStoredAttempts(): number {
-  try { return parseInt(sessionStorage.getItem("login_attempts") ?? "0"); } catch { return 0; }
+  try { return parseInt(localStorage.getItem("login_attempts") ?? "0"); } catch { return 0; }
 }
 
 function setStoredAttempts(n: number) {
-  try { sessionStorage.setItem("login_attempts", String(n)); } catch {}
+  try { localStorage.setItem("login_attempts", String(n)); } catch {}
 }
 
 function getCooldownEnd(): number {
-  try { return parseInt(sessionStorage.getItem("login_cooldown") ?? "0"); } catch { return 0; }
+  try { return parseInt(localStorage.getItem("login_cooldown") ?? "0"); } catch { return 0; }
 }
 
 function setCooldownEnd(t: number) {
-  try { sessionStorage.setItem("login_cooldown", String(t)); } catch {}
+  try { localStorage.setItem("login_cooldown", String(t)); } catch {}
 }
 
 export default function LoginPage() {
@@ -74,10 +80,9 @@ export default function LoginPage() {
       setStoredAttempts(attempts);
 
       if (attempts >= MAX_ATTEMPTS) {
-        const cooldownSec = BASE_COOLDOWN * Math.pow(2, attempts - MAX_ATTEMPTS);
-        setCooldownEnd(Date.now() + cooldownSec * 1000);
-        setCooldown(cooldownSec);
-        showToast("error", `Too many attempts. Try again in ${cooldownSec}s.`);
+        setCooldownEnd(Date.now() + COOLDOWN_SECONDS * 1000);
+        setCooldown(COOLDOWN_SECONDS);
+        showToast("error", `Too many attempts. Try again in ${formatCooldown(COOLDOWN_SECONDS)}.`);
       } else {
         showToast("error", `Invalid credentials. ${MAX_ATTEMPTS - attempts} attempt(s) remaining.`);
       }
@@ -88,6 +93,7 @@ export default function LoginPage() {
 
     setStoredAttempts(0);
     setCooldownEnd(0);
+    localStorage.setItem("login_timestamp", String(Date.now()));
     showToast("success", "Login successful!");
     setTimeout(() => router.push("/admin"), 500);
   };
@@ -139,7 +145,7 @@ export default function LoginPage() {
               disabled={loading || cooldown > 0}
               className="w-full bg-primary text-white px-6 py-3 rounded-[12px] text-[0.95rem] font-semibold border-none cursor-pointer transition-all duration-200 hover:bg-primary-accent disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? "Signing in..." : cooldown > 0 ? `Wait ${cooldown}s` : "Sign In"}
+              {loading ? "Signing in..." : cooldown > 0 ? `Cooldown ${formatCooldown(cooldown)}` : "Sign In"}
             </button>
           </form>
         </div>

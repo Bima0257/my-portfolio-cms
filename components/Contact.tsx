@@ -42,13 +42,16 @@ export default function Contact() {
     const email = formData.get('email') as string;
     const message = formData.get('message') as string;
 
-    const supabase = createPublicClient();
-    const { error: submitError } = await supabase
-      .from('messages')
-      .insert({ name, email, message });
+    const res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, message }),
+    });
 
-    if (submitError) {
-      setError('Failed to send message. Please try again.');
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.error || 'Failed to send message. Please try again.');
       setLoading(false);
       return;
     }
