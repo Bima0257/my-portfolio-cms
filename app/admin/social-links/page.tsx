@@ -135,7 +135,7 @@ export default function SocialLinksPage() {
                 className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-[0.85rem] font-semibold text-on-surface">Label (short text, e.g. "Dr")</label>
+              <label className="text-[0.85rem] font-semibold text-on-surface">Label (short text, e.g. &quot;Dr&quot;)</label>
               <input name="label" defaultValue={editing?.label ?? ""} maxLength={10}
                 className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
             </div>
