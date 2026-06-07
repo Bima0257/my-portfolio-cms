@@ -11,6 +11,7 @@ import { useToast } from "../_components/Toast";
 import FileUploader from "../_components/FileUploader";
 import { uploadFile } from "@/lib/supabase/storage";
 import IconPicker from "../_components/IconPicker";
+import TranslatedField from "../_components/TranslatedField";
 
 interface ProjectCategory {
   id: number;
@@ -20,7 +21,9 @@ interface ProjectCategory {
 interface Item {
   id: number;
   title: string;
+  title_id: string | null;
   description: string;
+  description_id: string | null;
   thumbnail: string | null;
   demo_url: string | null;
   github_url: string | null;
@@ -46,6 +49,10 @@ export default function ProjectsPage() {
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailRemove, setThumbnailRemove] = useState(false);
   const [iconValue, setIconValue] = useState("");
+  const [titleValue, setTitleValue] = useState("");
+  const [titleId, setTitleId] = useState("");
+  const [descriptionValue, setDescriptionValue] = useState("");
+  const [descriptionId, setDescriptionId] = useState("");
 
   const supabase = createClient();
 
@@ -85,8 +92,10 @@ export default function ProjectsPage() {
       }
 
       const payload = {
-        title: fd.get("title") as string,
-        description: (fd.get("description") as string) || "",
+        title: titleValue,
+        title_id: titleId || null,
+        description: descriptionValue,
+        description_id: descriptionId || null,
         thumbnail,
         demo_url: (fd.get("demo_url") as string) || null,
         github_url: (fd.get("github_url") as string) || null,
@@ -137,14 +146,14 @@ export default function ProjectsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-extrabold text-on-surface">Projects</h1>
-        <button onClick={() => { setEditing(null); setModalOpen(true); setIconValue(""); }}
+        <button onClick={() => { setEditing(null); setModalOpen(true); setIconValue(""); setTitleValue(""); setTitleId(""); setDescriptionValue(""); setDescriptionId(""); }}
           className="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-full text-[0.85rem] font-semibold border-none cursor-pointer hover:bg-primary-accent transition-all">
           <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add</span> Add Project
         </button>
       </div>
 
       {!loading && data.length === 0 ? (
-        <EmptyState label="Projects" onAdd={() => { setEditing(null); setModalOpen(true); setIconValue(""); }} />
+        <EmptyState label="Projects" onAdd={() => { setEditing(null); setModalOpen(true); setIconValue(""); setTitleValue(""); setTitleId(""); setDescriptionValue(""); setDescriptionId(""); }} />
       ) : (
         <SortableTable
           columns={[
@@ -160,7 +169,7 @@ export default function ProjectsPage() {
           ]}
           data={data}
           onReorder={handleReorder}
-          onEdit={(row) => { setEditing(row); setModalOpen(true); setIconValue(row.icon ?? ""); }}
+          onEdit={(row) => { setEditing(row); setModalOpen(true); setIconValue(row.icon ?? ""); setTitleValue(row.title); setTitleId(row.title_id ?? ""); setDescriptionValue(row.description); setDescriptionId(row.description_id ?? ""); }}
           onDelete={(row) => setDeleteTarget(row)}
           loading={loading}
         />
@@ -169,11 +178,7 @@ export default function ProjectsPage() {
       <FormModal open={modalOpen} title={editing ? "Edit Project" : "Add Project"} onClose={() => { setModalOpen(false); setEditing(null); }} onSubmit={handleSave} loading={saving}>
         <form id="project-form" className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[0.85rem] font-semibold text-on-surface">Title</label>
-              <input name="title" defaultValue={editing?.title ?? ""} required
-                className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
-            </div>
+            <TranslatedField label="Title" enValue={titleValue} idValue={titleId} onEnChange={setTitleValue} onIdChange={setTitleId} required />
             <div className="flex flex-col gap-1.5">
               <label className="text-[0.85rem] font-semibold text-on-surface">Category</label>
               <select name="project_category_id" defaultValue={editing?.project_category_id ?? ""}
@@ -225,11 +230,7 @@ export default function ProjectsPage() {
             <input name="github_url" defaultValue={editing?.github_url ?? ""} placeholder="https://github.com/..."
               className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[0.85rem] font-semibold text-on-surface">Description</label>
-            <textarea name="description" defaultValue={editing?.description ?? ""} rows={4}
-              className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full resize-none" />
-          </div>
+          <TranslatedField label="Description" enValue={descriptionValue} idValue={descriptionId} onEnChange={setDescriptionValue} onIdChange={setDescriptionId} type="textarea" rows={4} />
         </form>
       </FormModal>
 

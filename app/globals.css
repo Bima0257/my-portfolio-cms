@@ -31,7 +31,10 @@ body {
   line-height: 1.6;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: 'Syne', sans-serif;
   font-weight: 700;
   line-height: 1.15;
@@ -41,18 +44,29 @@ h1, h2, h3, h4 {
 .reveal {
   opacity: 0;
   transform: translateY(40px);
-  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+  transition:
+    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
 }
-.reveal.d1 { transition-delay: 0.1s; }
-.reveal.d2 { transition-delay: 0.2s; }
-.reveal.d3 { transition-delay: 0.3s; }
-.reveal.d4 { transition-delay: 0.45s; }
-.reveal.d5 { transition-delay: 0.55s; }
+.reveal.d1 {
+  transition-delay: 0.1s;
+}
+.reveal.d2 {
+  transition-delay: 0.2s;
+}
+.reveal.d3 {
+  transition-delay: 0.3s;
+}
+.reveal.d4 {
+  transition-delay: 0.45s;
+}
+.reveal.d5 {
+  transition-delay: 0.55s;
+}
 
 /* Skill bar animation */
 .skill-bar-fill {
@@ -99,5 +113,45 @@ h1, h2, h3, h4 {
     transition: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+}
+
+@keyframes breathe {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 106, 99, 0.4);
+  }
+
+  70% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 10px rgba(0, 106, 99, 0);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 106, 99, 0);
+  }
+}
+
+.animate-breathe {
+  animation: breathe 2.8s infinite ease-in-out;
+}
+
+.typing-cursor {
+  display: inline-block;
+  margin-left: 2px;
+  color: var(--color-primary);
+  animation: cursorBlink 1s ease-in-out infinite;
+}
+
+@keyframes cursorBlink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+
+  50%,
+  100% {
+    opacity: 0;
   }
 }

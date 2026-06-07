@@ -9,6 +9,7 @@ import EmptyState from "../_components/EmptyState";
 import { revalidatePortfolio } from "../_utils/revalidate";
 import { useToast } from "../_components/Toast";
 import IconPicker from "../_components/IconPicker";
+import TranslatedField from "../_components/TranslatedField";
 
 const LEVELS = ["Beginner", "Intermediate", "Advanced", "Expert"];
 
@@ -20,6 +21,7 @@ interface SkillCategory {
 interface Item {
   id: number;
   name: string;
+  name_id: string;
   level: string;
   percentage: number;
   icon: string | null;
@@ -39,6 +41,8 @@ export default function SkillsPage() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [iconValue, setIconValue] = useState("");
+  const [nameVal, setNameVal] = useState("");
+  const [nameId, setNameId] = useState("");
 
   const supabase = createClient();
 
@@ -70,7 +74,8 @@ export default function SkillsPage() {
       const form = document.getElementById("skill-form") as HTMLFormElement;
       const fd = new FormData(form);
       const payload: Record<string, any> = {
-        name: fd.get("name") as string,
+        name: nameVal,
+        name_id: nameId,
         level: fd.get("level") as string,
         percentage: parseInt(fd.get("percentage") as string) || 0,
         icon: iconValue,
@@ -115,14 +120,14 @@ export default function SkillsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-extrabold text-on-surface">Skills</h1>
-        <button onClick={() => { setEditing(null); setModalOpen(true); setIconValue(""); }}
+        <button onClick={() => { setEditing(null); setModalOpen(true); setIconValue(""); setNameVal(""); setNameId(""); }}
           className="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-full text-[0.85rem] font-semibold border-none cursor-pointer hover:bg-primary-accent transition-all">
           <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add</span> Add Skill
         </button>
       </div>
 
       {!loading && data.length === 0 ? (
-        <EmptyState label="Skills" onAdd={() => { setEditing(null); setModalOpen(true); setIconValue(""); }} />
+        <EmptyState label="Skills" onAdd={() => { setEditing(null); setModalOpen(true); setIconValue(""); setNameVal(""); setNameId(""); }} />
       ) : (
         <SortableTable
           columns={[
@@ -140,19 +145,15 @@ export default function SkillsPage() {
           ]}
           data={data}
           onReorder={handleReorder}
-          onEdit={(row) => { setEditing(row); setModalOpen(true); setIconValue(row.icon ?? ""); }}
+          onEdit={(row) => { setEditing(row); setModalOpen(true); setIconValue(row.icon ?? ""); setNameVal(row.name); setNameId(row.name_id ?? ""); }}
           onDelete={(row) => setDeleteTarget(row)}
           loading={loading}
         />
       )}
 
-      <FormModal open={modalOpen} title={editing ? "Edit Skill" : "Add Skill"} onClose={() => { setModalOpen(false); setEditing(null); }} onSubmit={handleSave} loading={saving}>
+      <FormModal open={modalOpen} title={editing ? "Edit Skill" : "Add Skill"} onClose={() => { setModalOpen(false); setEditing(null); setNameVal(""); setNameId(""); }} onSubmit={handleSave} loading={saving}>
         <form id="skill-form" className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[0.85rem] font-semibold text-on-surface">Name</label>
-            <input name="name" defaultValue={editing?.name ?? ""} required
-              className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
-          </div>
+          <TranslatedField label="Name" enValue={nameVal} idValue={nameId} onEnChange={setNameVal} onIdChange={setNameId} required />
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-[0.85rem] font-semibold text-on-surface">Level</label>

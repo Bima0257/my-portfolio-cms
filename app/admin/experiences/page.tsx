@@ -8,16 +8,20 @@ import ConfirmDialog from "../_components/ConfirmDialog";
 import EmptyState from "../_components/EmptyState";
 import { revalidatePortfolio } from "../_utils/revalidate";
 import { useToast } from "../_components/Toast";
+import TranslatedField from "../_components/TranslatedField";
 
 interface Item {
   id: number;
   position: string;
+  position_id: string | null;
   company: string;
+  company_id: string | null;
   url: string | null;
   start_date: string;
   end_date: string | null;
   is_current: boolean;
   description: string | null;
+  description_id: string | null;
   sort_order: number;
 }
 
@@ -30,6 +34,12 @@ export default function ExperiencesPage() {
   const [deleteTarget, setDeleteTarget] = useState<Item | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [positionEn, setPositionEn] = useState("");
+  const [positionId, setPositionId] = useState("");
+  const [companyEn, setCompanyEn] = useState("");
+  const [companyId, setCompanyId] = useState("");
+  const [descriptionEn, setDescriptionEn] = useState("");
+  const [descriptionId, setDescriptionId] = useState("");
 
   const supabase = createClient();
 
@@ -40,6 +50,24 @@ export default function ExperiencesPage() {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  useEffect(() => {
+    if (editing) {
+      setPositionEn(editing.position ?? "");
+      setPositionId(editing.position_id ?? "");
+      setCompanyEn(editing.company ?? "");
+      setCompanyId(editing.company_id ?? "");
+      setDescriptionEn(editing.description ?? "");
+      setDescriptionId(editing.description_id ?? "");
+    } else {
+      setPositionEn("");
+      setPositionId("");
+      setCompanyEn("");
+      setCompanyId("");
+      setDescriptionEn("");
+      setDescriptionId("");
+    }
+  }, [editing]);
 
   const handleReorder = async (ids: (string | number)[]) => {
     const updated = data.slice().sort((a, b) => ids.indexOf(String(a.id)) - ids.indexOf(String(b.id))).map((item, i) => ({ ...item, sort_order: i + 1 }));
@@ -57,13 +85,16 @@ export default function ExperiencesPage() {
       const form = document.getElementById("exp-form") as HTMLFormElement;
       const fd = new FormData(form);
       const payload: Record<string, any> = {
-        position: fd.get("position") as string,
-        company: fd.get("company") as string,
+        position: positionEn,
+        position_id: positionId,
+        company: companyEn,
+        company_id: companyId,
         url: (fd.get("url") as string) || "",
         start_date: fd.get("start_date") as string,
         end_date: (fd.get("end_date") as string) || null,
         is_current: fd.get("is_current") === "on",
-        description: (fd.get("description") as string) || "",
+        description: descriptionEn,
+        description_id: descriptionId,
         sort_order: editing?.sort_order ?? data.length + 1,
       };
       if (payload.is_current) payload.end_date = null;
@@ -131,18 +162,8 @@ export default function ExperiencesPage() {
 
       <FormModal open={modalOpen} title={editing ? "Edit Experience" : "Add Experience"} onClose={() => { setModalOpen(false); setEditing(null); }} onSubmit={handleSave} loading={saving}>
         <form id="exp-form" className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[0.85rem] font-semibold text-on-surface">Position</label>
-              <input name="position" defaultValue={editing?.position ?? ""} required
-                className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[0.85rem] font-semibold text-on-surface">Company</label>
-              <input name="company" defaultValue={editing?.company ?? ""} required
-                className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
-            </div>
-          </div>
+          <TranslatedField label="Position" enValue={positionEn} idValue={positionId} onEnChange={setPositionEn} onIdChange={setPositionId} required />
+          <TranslatedField label="Company" enValue={companyEn} idValue={companyId} onEnChange={setCompanyEn} onIdChange={setCompanyId} required />
           <div className="flex flex-col gap-1.5">
             <label className="text-[0.85rem] font-semibold text-on-surface">URL</label>
             <input name="url" defaultValue={editing?.url ?? ""}
@@ -165,11 +186,7 @@ export default function ExperiencesPage() {
               className="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary" />
             Currently working here
           </label>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[0.85rem] font-semibold text-on-surface">Description</label>
-            <textarea name="description" defaultValue={editing?.description ?? ""} rows={3}
-              className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full resize-none" />
-          </div>
+          <TranslatedField label="Description" enValue={descriptionEn} idValue={descriptionId} onEnChange={setDescriptionEn} onIdChange={setDescriptionId} type="textarea" rows={4} />
         </form>
       </FormModal>
 

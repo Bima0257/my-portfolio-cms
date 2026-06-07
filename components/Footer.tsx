@@ -1,18 +1,23 @@
-const navLinks = [
-  { href: "#home", label: "Home" },
-  { href: "#about", label: "About" },
-  { href: "#skills", label: "Skills" },
-  { href: "#projects", label: "Projects" },
-  { href: "#experience", label: "Experience" },
-  { href: "#contact", label: "Contact" },
-];
+"use client";
+
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Footer() {
+  const { t } = useLanguage();
+
+  const navLinks = [
+    { href: "#home", label: t.nav.home },
+    { href: "#about", label: t.nav.home },
+    { href: "#skills", label: t.nav.skills },
+    { href: "#projects", label: t.nav.projects },
+    { href: "#experience", label: t.nav.experience },
+    { href: "#contact", label: t.nav.contact },
+  ];
+
   return (
     <footer className="bg-on-surface text-white/60 py-12 pb-8">
       <div className="max-w-[1160px] mx-auto px-8">
         <div className="flex flex-col gap-8">
-          {/* Top row */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8 pb-8 border-b border-white/10">
             <a
               href="#home"
@@ -33,11 +38,10 @@ export default function Footer() {
             </nav>
           </div>
 
-          {/* Bottom row */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between flex-wrap gap-4">
-            <p className="text-[0.85rem]">© 2026 Bima. All rights reserved.</p>
+            <p className="text-[0.85rem]">{t.footer.copyright}</p>
             <p className="text-[0.85rem] text-white/40">
-              Crafted with <span className="text-primary-light">♡</span> in Yogyakarta
+              {t.footer.crafted}
             </p>
           </div>
         </div>

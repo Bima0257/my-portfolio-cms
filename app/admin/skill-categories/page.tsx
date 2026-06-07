@@ -8,6 +8,7 @@ import ConfirmDialog from "../_components/ConfirmDialog";
 import EmptyState from "../_components/EmptyState";
 import { revalidatePortfolio } from "../_utils/revalidate";
 import { useToast } from "../_components/Toast";
+import TranslatedField from "../_components/TranslatedField";
 import IconPicker from "../_components/IconPicker";
 
 interface Item {
@@ -17,6 +18,8 @@ interface Item {
   description: string | null;
   icon: string | null;
   sort_order: number;
+  name_id: string;
+  description_id: string;
 }
 
 export default function SkillCategoriesPage() {
@@ -29,6 +32,10 @@ export default function SkillCategoriesPage() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [iconValue, setIconValue] = useState("");
+  const [nameEn, setNameEn] = useState("");
+  const [nameId, setNameId] = useState("");
+  const [descriptionEn, setDescriptionEn] = useState("");
+  const [descriptionId, setDescriptionId] = useState("");
 
   const supabase = createClient();
 
@@ -74,9 +81,11 @@ export default function SkillCategoriesPage() {
       const fd = new FormData(form);
 
       const payload = {
-        name: fd.get("name") as string,
-        slug: (fd.get("slug") as string) || (fd.get("name") as string)?.toLowerCase().replace(/\s+/g, "-"),
-        description: (fd.get("description") as string) || "",
+        name: nameEn,
+        name_id: nameId,
+        slug: (fd.get("slug") as string) || nameEn.toLowerCase().replace(/\s+/g, "-"),
+        description: descriptionEn || "",
+        description_id: descriptionId || "",
         icon: iconValue,
         sort_order: editing?.sort_order ?? data.length + 1,
       };
@@ -120,7 +129,7 @@ export default function SkillCategoriesPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-extrabold text-on-surface">Skill Categories</h1>
         <button
-          onClick={() => { setEditing(null); setModalOpen(true); setIconValue(""); }}
+          onClick={() => { setEditing(null); setModalOpen(true); setIconValue(""); setNameEn(""); setNameId(""); setDescriptionEn(""); setDescriptionId(""); }}
           className="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-full text-[0.85rem] font-semibold border-none cursor-pointer hover:bg-primary-accent transition-all"
         >
           <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add</span>
@@ -129,7 +138,7 @@ export default function SkillCategoriesPage() {
       </div>
 
       {data.length === 0 && !loading ? (
-        <EmptyState label="Skill Categories" onAdd={() => { setEditing(null); setModalOpen(true); setIconValue(""); }} />
+        <EmptyState label="Skill Categories" onAdd={() => { setEditing(null); setModalOpen(true); setIconValue(""); setNameEn(""); setNameId(""); setDescriptionEn(""); setDescriptionId(""); }} />
       ) : (
         <SortableTable
           columns={[
@@ -140,7 +149,7 @@ export default function SkillCategoriesPage() {
           ]}
           data={data}
           onReorder={handleReorder}
-          onEdit={(row) => { setEditing(row); setModalOpen(true); setIconValue(row.icon ?? ""); }}
+          onEdit={(row) => { setEditing(row); setModalOpen(true); setIconValue(row.icon ?? ""); setNameEn(row.name); setNameId(row.name_id ?? ""); setDescriptionEn(row.description ?? ""); setDescriptionId(row.description_id ?? ""); }}
           onDelete={(row) => setDeleteTarget(row)}
           loading={loading}
         />
@@ -154,22 +163,14 @@ export default function SkillCategoriesPage() {
         loading={saving}
       >
         <form id="skill-cat-form" className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[0.85rem] font-semibold text-on-surface">Name</label>
-            <input name="name" defaultValue={editing?.name ?? ""} required
-              className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
-          </div>
+          <TranslatedField label="Name" enValue={nameEn} idValue={nameId} onEnChange={setNameEn} onIdChange={setNameId} required />
           <div className="flex flex-col gap-1.5">
             <label className="text-[0.85rem] font-semibold text-on-surface">Slug (optional, auto-generated)</label>
             <input name="slug" defaultValue={editing?.slug ?? ""}
               className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
           </div>
           <IconPicker value={iconValue} onChange={setIconValue} />
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[0.85rem] font-semibold text-on-surface">Description</label>
-            <textarea name="description" defaultValue={editing?.description ?? ""} rows={3}
-              className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full resize-none" />
-          </div>
+          <TranslatedField label="Description" enValue={descriptionEn} idValue={descriptionId} onEnChange={setDescriptionEn} onIdChange={setDescriptionId} type="textarea" rows={3} />
         </form>
       </FormModal>
 

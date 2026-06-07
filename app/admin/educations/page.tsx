@@ -8,15 +8,20 @@ import ConfirmDialog from "../_components/ConfirmDialog";
 import EmptyState from "../_components/EmptyState";
 import { revalidatePortfolio } from "../_utils/revalidate";
 import { useToast } from "../_components/Toast";
+import TranslatedField from "../_components/TranslatedField";
 
 interface Item {
   id: number;
   institution: string;
+  institution_id: string | null;
   degree: string;
+  degree_id: string | null;
   field_of_study: string | null;
+  field_of_study_id: string | null;
   start_year: number;
   end_year: number | null;
   description: string | null;
+  description_id: string | null;
   sort_order: number;
 }
 
@@ -29,6 +34,14 @@ export default function EducationsPage() {
   const [deleteTarget, setDeleteTarget] = useState<Item | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [degreeEn, setDegreeEn] = useState("");
+  const [degreeId, setDegreeId] = useState("");
+  const [institutionEn, setInstitutionEn] = useState("");
+  const [institutionId, setInstitutionId] = useState("");
+  const [fieldOfStudyEn, setFieldOfStudyEn] = useState("");
+  const [fieldOfStudyId, setFieldOfStudyId] = useState("");
+  const [descriptionEn, setDescriptionEn] = useState("");
+  const [descriptionId, setDescriptionId] = useState("");
 
   const supabase = createClient();
 
@@ -39,6 +52,28 @@ export default function EducationsPage() {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  useEffect(() => {
+    if (editing) {
+      setDegreeEn(editing.degree ?? "");
+      setDegreeId(editing.degree_id ?? "");
+      setInstitutionEn(editing.institution ?? "");
+      setInstitutionId(editing.institution_id ?? "");
+      setFieldOfStudyEn(editing.field_of_study ?? "");
+      setFieldOfStudyId(editing.field_of_study_id ?? "");
+      setDescriptionEn(editing.description ?? "");
+      setDescriptionId(editing.description_id ?? "");
+    } else {
+      setDegreeEn("");
+      setDegreeId("");
+      setInstitutionEn("");
+      setInstitutionId("");
+      setFieldOfStudyEn("");
+      setFieldOfStudyId("");
+      setDescriptionEn("");
+      setDescriptionId("");
+    }
+  }, [editing]);
 
   const handleReorder = async (ids: (string | number)[]) => {
     const updated = data.slice().sort((a, b) => ids.indexOf(String(a.id)) - ids.indexOf(String(b.id))).map((item, i) => ({ ...item, sort_order: i + 1 }));
@@ -56,12 +91,16 @@ export default function EducationsPage() {
       const form = document.getElementById("edu-form") as HTMLFormElement;
       const fd = new FormData(form);
       const payload: Record<string, any> = {
-        institution: fd.get("institution") as string,
-        degree: fd.get("degree") as string,
-        field_of_study: (fd.get("field_of_study") as string) || "",
+        degree: degreeEn,
+        degree_id: degreeId,
+        institution: institutionEn,
+        institution_id: institutionId,
+        field_of_study: fieldOfStudyEn,
+        field_of_study_id: fieldOfStudyId,
         start_year: parseInt(fd.get("start_year") as string) || new Date().getFullYear(),
         end_year: fd.get("end_year") ? parseInt(fd.get("end_year") as string) : null,
-        description: (fd.get("description") as string) || "",
+        description: descriptionEn,
+        description_id: descriptionId,
         sort_order: editing?.sort_order ?? data.length + 1,
       };
 
@@ -129,22 +168,10 @@ export default function EducationsPage() {
       <FormModal open={modalOpen} title={editing ? "Edit Education" : "Add Education"} onClose={() => { setModalOpen(false); setEditing(null); }} onSubmit={handleSave} loading={saving}>
         <form id="edu-form" className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[0.85rem] font-semibold text-on-surface">Institution</label>
-              <input name="institution" defaultValue={editing?.institution ?? ""} required
-                className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[0.85rem] font-semibold text-on-surface">Degree</label>
-              <input name="degree" defaultValue={editing?.degree ?? ""} required
-                className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
-            </div>
+            <TranslatedField label="Degree" enValue={degreeEn} idValue={degreeId} onEnChange={setDegreeEn} onIdChange={setDegreeId} required />
+            <TranslatedField label="Institution" enValue={institutionEn} idValue={institutionId} onEnChange={setInstitutionEn} onIdChange={setInstitutionId} required />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[0.85rem] font-semibold text-on-surface">Field of Study</label>
-            <input name="field_of_study" defaultValue={editing?.field_of_study ?? ""}
-              className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
-          </div>
+          <TranslatedField label="Field of Study" enValue={fieldOfStudyEn} idValue={fieldOfStudyId} onEnChange={setFieldOfStudyEn} onIdChange={setFieldOfStudyId} />
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-[0.85rem] font-semibold text-on-surface">Start Year</label>
@@ -157,11 +184,7 @@ export default function EducationsPage() {
                 className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
             </div>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[0.85rem] font-semibold text-on-surface">Description</label>
-            <textarea name="description" defaultValue={editing?.description ?? ""} rows={3}
-              className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full resize-none" />
-          </div>
+          <TranslatedField label="Description" enValue={descriptionEn} idValue={descriptionId} onEnChange={setDescriptionEn} onIdChange={setDescriptionId} type="textarea" rows={4} />
         </form>
       </FormModal>
 

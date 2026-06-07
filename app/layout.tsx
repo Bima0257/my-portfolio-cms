@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import "./globals.css";
+import { LanguageProvider } from "@/context/LanguageContext";
+import LocaleHtml from "@/components/LocaleHtml";
+import DebugPanel from "@/components/DebugPanel";
 
 export const metadata: Metadata = {
   title: "Bima — Fullstack-Developer",
@@ -14,14 +18,21 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = ((await cookies()).get("portfolio_locale")?.value ?? "en") as "en" | "id";
+
   return (
-    <html lang="id" className="scroll-smooth">
-      <body className="antialiased">{children}</body>
-    </html>
+    <LocaleHtml>
+      <body className="antialiased">
+        <LanguageProvider initialLocale={locale}>
+          {children}
+          <DebugPanel />
+        </LanguageProvider>
+      </body>
+    </LocaleHtml>
   );
 }

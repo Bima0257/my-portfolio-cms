@@ -6,12 +6,14 @@ import SortableTable from "../_components/SortableTable";
 import FormModal from "../_components/FormModal";
 import ConfirmDialog from "../_components/ConfirmDialog";
 import EmptyState from "../_components/EmptyState";
+import TranslatedField from "../_components/TranslatedField";
 import { revalidatePortfolio } from "../_utils/revalidate";
 import { useToast } from "../_components/Toast";
 
 interface Item {
   id: number;
   name: string;
+  name_id: string;
   slug: string;
   sort_order: number;
 }
@@ -22,6 +24,8 @@ export default function ProjectCategoriesPage() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Item | null>(null);
+  const [name, setName] = useState("");
+  const [nameId, setNameId] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Item | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -51,9 +55,10 @@ export default function ProjectCategoriesPage() {
     try {
       const form = document.getElementById("proj-cat-form") as HTMLFormElement;
       const fd = new FormData(form);
-      const payload = {
-        name: fd.get("name") as string,
-        slug: (fd.get("slug") as string) || (fd.get("name") as string)?.toLowerCase().replace(/\s+/g, "-"),
+      const payload: Record<string, unknown> = {
+        name,
+        name_id: nameId,
+        slug: (fd.get("slug") as string) || name.toLowerCase().replace(/\s+/g, "-"),
         sort_order: editing?.sort_order ?? data.length + 1,
       };
 
@@ -94,14 +99,14 @@ export default function ProjectCategoriesPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-extrabold text-on-surface">Project Categories</h1>
-        <button onClick={() => { setEditing(null); setModalOpen(true); }}
+        <button onClick={() => { setEditing(null); setName(""); setNameId(""); setModalOpen(true); }}
           className="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-full text-[0.85rem] font-semibold border-none cursor-pointer hover:bg-primary-accent transition-all">
           <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add</span> Add Category
         </button>
       </div>
 
       {!loading && data.length === 0 ? (
-        <EmptyState label="Project Categories" onAdd={() => { setEditing(null); setModalOpen(true); }} />
+        <EmptyState label="Project Categories" onAdd={() => { setEditing(null); setName(""); setNameId(""); setModalOpen(true); }} />
       ) : (
         <SortableTable
           columns={[
@@ -110,19 +115,15 @@ export default function ProjectCategoriesPage() {
           ]}
           data={data}
           onReorder={handleReorder}
-          onEdit={(row) => { setEditing(row); setModalOpen(true); }}
+          onEdit={(row) => { setEditing(row); setName(row.name); setNameId(row.name_id); setModalOpen(true); }}
           onDelete={(row) => setDeleteTarget(row)}
           loading={loading}
         />
       )}
 
-      <FormModal open={modalOpen} title={editing ? "Edit Category" : "Add Category"} onClose={() => { setModalOpen(false); setEditing(null); }} onSubmit={handleSave} loading={saving}>
+      <FormModal open={modalOpen} title={editing ? "Edit Category" : "Add Category"} onClose={() => { setModalOpen(false); setEditing(null); setName(""); setNameId(""); }} onSubmit={handleSave} loading={saving}>
         <form id="proj-cat-form" className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[0.85rem] font-semibold text-on-surface">Name</label>
-            <input name="name" defaultValue={editing?.name ?? ""} required
-              className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
-          </div>
+          <TranslatedField label="Name" enValue={name} idValue={nameId} onEnChange={setName} onIdChange={setNameId} required />
           <div className="flex flex-col gap-1.5">
             <label className="text-[0.85rem] font-semibold text-on-surface">Slug (optional)</label>
             <input name="slug" defaultValue={editing?.slug ?? ""}

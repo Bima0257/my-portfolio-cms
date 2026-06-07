@@ -104,7 +104,7 @@ export default function LoginPage() {
         <div className="bg-surface-card rounded-[20px] p-10 border border-outline-variant">
           <div className="text-center mb-8">
             <h1 className="font-display text-2xl font-extrabold text-on-surface mb-1">
-              Bin<span className="text-primary">jan</span>
+              Bi<span className="text-primary">ma</span>
             </h1>
             <p className="text-[0.85rem] text-on-surface-muted">Admin Dashboard</p>
           </div>

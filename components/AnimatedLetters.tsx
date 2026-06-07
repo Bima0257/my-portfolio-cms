@@ -1,24 +1,73 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { useEffect, useRef, useState } from 'react';
 
-export default function AnimatedLetters({ text, className = "", delay = 0, stagger = 0.03 }: { text: string; className?: string; delay?: number; stagger?: number }) {
-  const chars = useMemo(() => text.split(""), [text]);
+interface Props {
+  text: string;
+  className?: string;
+  delay?: number;
+  typingSpeed?: number;
+  deletingSpeed?: number;
+  pauseDuration?: number;
+}
+
+export default function AnimatedLetters({
+  text,
+  className = '',
+  delay = 800,
+  typingSpeed = 70,
+  deletingSpeed = 40,
+  pauseDuration = 2500,
+}: Props) {
+  const [displayed, setDisplayed] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const indexRef = useRef(0);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+
+    const start = () => {
+      timer = setTimeout(function tick() {
+        if (!isDeleting) {
+          indexRef.current++;
+
+          setDisplayed(text.slice(0, indexRef.current));
+
+          if (indexRef.current === text.length) {
+            timer = setTimeout(() => {
+              setIsDeleting(true);
+            }, pauseDuration);
+            return;
+          }
+
+          timer = setTimeout(tick, typingSpeed);
+        } else {
+          indexRef.current--;
+
+          setDisplayed(text.slice(0, indexRef.current));
+
+          if (indexRef.current === 0) {
+            timer = setTimeout(() => {
+              setIsDeleting(false);
+            }, 600);
+            return;
+          }
+
+          timer = setTimeout(tick, deletingSpeed);
+        }
+      }, delay);
+    };
+
+    start();
+
+    return () => clearTimeout(timer);
+  }, [text, isDeleting, typingSpeed, deletingSpeed, pauseDuration, delay]);
 
   return (
     <span className={className}>
-      {chars.map((char, i) => (
-        <motion.span
-          key={i}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.15, delay: delay + i * stagger }}
-          className="inline-block"
-        >
-          {char === " " ? "\u00A0" : char}
-        </motion.span>
-      ))}
+      {displayed}
+      <span className='typing-cursor'>|</span>
     </span>
   );
 }

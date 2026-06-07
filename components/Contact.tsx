@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createPublicClient } from '@/lib/supabase/public';
 import Icon from '@/components/Icon';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface SocialLink {
   id: number;
@@ -13,6 +14,7 @@ interface SocialLink {
 }
 
 export default function Contact() {
+  const { t } = useLanguage();
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
@@ -51,7 +53,7 @@ export default function Contact() {
     const data = await res.json();
 
     if (!res.ok) {
-      setError(data.error || 'Failed to send message. Please try again.');
+      setError(data.error || t.contact.error);
       setLoading(false);
       return;
     }
@@ -66,28 +68,26 @@ export default function Contact() {
         <div className='reveal flex flex-col items-start'>
           <div className='inline-flex items-center gap-2 text-[0.78rem] font-semibold tracking-[0.1em] uppercase text-primary mb-4'>
             <span className='block w-6 h-0.5 bg-primary rounded-sm' />
-            Get In Touch
+            {t.contact.badge}
           </div>
           <h2
             className='font-display font-extrabold text-on-surface tracking-tight'
             style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)' }}
           >
-            Let&apos;s Talk
+            {t.contact.title}
           </h2>
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-[5fr_7fr] gap-20 items-start mt-12'>
           <div className='reveal d1 flex flex-col gap-8'>
             <p className='text-on-surface-muted leading-[1.7] max-w-[360px]'>
-              Have a project in mind or just want to chat about design? I&apos;d
-              love to hear from you. Fill in the form and I&apos;ll get back to
-              you within a day.
+              {t.contact.desc}
             </p>
 
             {[
               {
                 icon: 'mail',
-                label: 'Email',
+                label: t.contact.email,
                 content: (
                   <a
                     href='mailto:bimatri377@gmail.com'
@@ -99,19 +99,19 @@ export default function Contact() {
               },
               {
                 icon: 'location_on',
-                label: 'Location',
+                label: t.contact.location,
                 content: (
                   <span className='text-[0.9rem] text-on-surface-muted'>
-                    Yogyakarta, Indonesia
+                    {t.contact.yk}
                   </span>
                 ),
               },
               {
                 icon: 'schedule',
-                label: 'Availability',
+                label: t.contact.availability,
                 content: (
                   <span className='text-[0.9rem] text-on-surface-muted'>
-                    Open for Projects · WIB (UTC+7)
+                    {t.contact.openFor}
                   </span>
                 ),
               },
@@ -132,7 +132,7 @@ export default function Contact() {
             {socialLinks.length > 0 && (
               <div>
                 <p className='text-[0.875rem] font-semibold text-on-surface mb-3'>
-                  Follow Me
+                  {t.contact.follow}
                 </p>
                 <div className='flex gap-3'>
                   {socialLinks.map((s) => (
@@ -155,7 +155,7 @@ export default function Contact() {
             {submitted ? (
               <div className='flex items-center gap-3 bg-primary-muted text-primary px-5 py-4 rounded-[12px] font-semibold text-[0.95rem]'>
                 <Icon name='check_circle' size={22} />
-                Message sent! I&apos;ll get back to you within 24 hours.
+                {t.contact.success}
               </div>
             ) : (
               <form
@@ -169,7 +169,7 @@ export default function Contact() {
                       className='text-[0.85rem] font-semibold text-on-surface'
                       htmlFor='fname'
                     >
-                      First Name
+                      {t.contact.firstName}
                     </label>
                     <input
                       id='fname'
@@ -185,7 +185,7 @@ export default function Contact() {
                       className='text-[0.85rem] font-semibold text-on-surface'
                       htmlFor='lname'
                     >
-                      Last Name
+                      {t.contact.lastName}
                     </label>
                     <input
                       id='lname'
@@ -201,13 +201,13 @@ export default function Contact() {
                 {[
                   {
                     id: 'email',
-                    label: 'Email Address',
+                    label: t.contact.emailAddress,
                     type: 'email',
                     placeholder: 'bimatri377@gmail.com',
                   },
                   {
                     id: 'subject',
-                    label: 'Subject',
+                    label: t.contact.subject,
                     type: 'text',
                     placeholder: 'Project Inquiry',
                   },
@@ -235,7 +235,7 @@ export default function Contact() {
                     className='text-[0.85rem] font-semibold text-on-surface'
                     htmlFor='message'
                   >
-                    Message
+                    {t.contact.message}
                   </label>
                   <textarea
                     id='message'
@@ -257,7 +257,7 @@ export default function Contact() {
                   disabled={loading}
                   className='self-start inline-flex items-center gap-2 bg-primary text-white px-8 py-[0.85rem] rounded-full text-[0.95rem] font-semibold font-body border-none cursor-pointer transition-all duration-200 hover:bg-primary-accent hover:-translate-y-0.5 hover:shadow-primary-glow disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none'
                 >
-                  {loading ? 'Sending...' : 'Send Message'}
+                  {loading ? t.contact.sending : t.contact.send}
                   {!loading && <Icon name='send' size={18} />}
                 </button>
               </form>

@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { createPublicClient } from '@/lib/supabase/public';
 import Icon from '@/components/Icon';
+import { useLanguage } from '@/context/LanguageContext';
+import { f } from '@/lib/locale';
 
 interface ProjectCategory {
   id: number;
@@ -27,6 +29,7 @@ interface Project {
 const delays = ['d1', 'd2', 'd3', 'd1', 'd2', 'd3'];
 
 export default function Projects() {
+  const { t, locale } = useLanguage();
   const [projects, setProjects] = useState<Project[]>([]);
   const [categories, setCategories] = useState<ProjectCategory[]>([]);
   const [activeFilter, setActiveFilter] = useState('all');
@@ -36,23 +39,69 @@ export default function Projects() {
   useEffect(() => {
     let cancelled = false;
     const supabase = createPublicClient();
+    const titleKey = f(locale, 'title');
+    const descKey = f(locale, 'description');
+    const nameKey = f(locale, 'name');
 
     (async () => {
       const [projRes, catRes] = await Promise.all([
-        supabase.from('projects').select('*').order('sort_order'),
-        supabase.from('project_categories').select('*').order('sort_order'),
+        supabase
+          .from('projects')
+          .select(`*, ${titleKey}, ${descKey}`)
+          .order('sort_order'),
+        supabase
+          .from('project_categories')
+          .select(`id, ${nameKey}, slug`)
+          .order('sort_order'),
       ]);
 
       if (cancelled) return;
-      if (projRes.data) setProjects(projRes.data as unknown as Project[]);
-      if (catRes.data) setCategories(catRes.data);
+      if (projRes.data) {
+        console.log(
+          '🔍 [Projects] locale:',
+          locale,
+          '| titleKey:',
+          titleKey,
+          '| descKey:',
+          descKey,
+        );
+        console.log(
+          '🔍 [Projects] raw sample:',
+          projRes.data.slice(0, 2).map((p: any) => ({
+            title_en: p.title,
+            [`${titleKey}`]: p[titleKey],
+            title_final: p[titleKey] ?? p.title,
+          })),
+        );
+        const mapped = projRes.data.map((p: any) => ({
+          ...p,
+          title: p[titleKey] ?? p.title,
+          description: p[descKey] ?? p.description,
+        }));
+        setProjects(mapped as unknown as Project[]);
+      }
+      if (catRes.data) {
+        console.log(
+          '🔍 [Projects] categories:',
+          catRes.data.map((c: any) => ({
+            name_en: c.name,
+            [`${nameKey}`]: c[nameKey],
+            name_final: c[nameKey] ?? c.name,
+          })),
+        );
+        const mapped = catRes.data.map((c: any) => ({
+          ...c,
+          name: c[nameKey] ?? c.name,
+        }));
+        setCategories(mapped);
+      }
       setLoading(false);
     })();
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [locale]);
 
   const filtered = projects.filter(
     (p) =>
@@ -69,13 +118,13 @@ export default function Projects() {
         <div className='reveal flex flex-col items-start mb-4'>
           <div className='inline-flex items-center gap-2 text-[0.78rem] font-semibold tracking-[0.1em] uppercase text-primary mb-4'>
             <span className='block w-6 h-0.5 bg-primary rounded-sm' />
-            Portfolio
+            {t.projects.badge}
           </div>
           <h2
             className='font-display font-extrabold text-on-surface tracking-tight'
             style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)' }}
           >
-            Selected Projects
+            {t.projects.title}
           </h2>
         </div>
 
@@ -88,7 +137,7 @@ export default function Projects() {
                 : 'bg-surface-card border-outline-variant text-on-surface-muted hover:bg-primary hover:border-primary hover:text-white'
             }`}
           >
-            All Work
+            {t.projects.allWork}
           </button>
           {categoriesWithProjects.map((cat) => (
             <button
@@ -113,7 +162,7 @@ export default function Projects() {
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
             {filtered.length === 0 && (
               <div className='col-span-full text-center py-12 text-on-surface-muted'>
-                No projects to display.
+                {t.projects.empty}
               </div>
             )}
             {filtered.map((project, i) => (
@@ -148,7 +197,6 @@ export default function Projects() {
                     onClick={() => setSelected(project)}
                     className='absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100 border-none cursor-pointer w-full'
                   >
-                    {/* Gradient layer dengan transparansi */}
                     <div
                       className='absolute inset-0'
                       style={{
@@ -158,10 +206,9 @@ export default function Projects() {
                         opacity: 0.85,
                       }}
                     />
-                    {/* Content di atas gradient */}
                     <span className='relative z-10 text-white text-[0.875rem] font-semibold flex items-center gap-1.5'>
                       <Icon name={project.icon || 'open_in_new'} size={18} />
-                      View Detail
+                      {t.projects.viewDetail}
                     </span>
                   </button>
                 </div>
@@ -180,7 +227,7 @@ export default function Projects() {
                   <div className='font-display text-[1rem] font-bold mb-1'>
                     {project.title}
                   </div>
-                  <p className='text-[0.875rem] text-on-surface-muted leading-[1.6] mb-4'>
+                  <p className='text-[0.875rem] text-on-surface-muted leading-[1.6] line-clamp-3 mb-4'>
                     {project.description}
                   </p>
 
@@ -193,7 +240,7 @@ export default function Projects() {
                         className='inline-flex items-center gap-1.5 bg-primary text-white px-4 py-2 rounded-full text-[0.78rem] font-semibold no-underline transition-all duration-200 hover:bg-primary-accent'
                       >
                         <Icon name='open_in_new' size={14} />
-                        Live Site
+                        {t.projects.liveSite}
                       </a>
                     )}
                     {project.github_url && (
@@ -204,7 +251,7 @@ export default function Projects() {
                         className='inline-flex items-center gap-1.5 bg-surface-card text-on-surface px-4 py-2 rounded-full text-[0.78rem] font-semibold no-underline border border-outline-variant transition-all duration-200 hover:bg-surface-low'
                       >
                         <Icon name='github' size={14} />
-                        GitHub
+                        {t.projects.github}
                       </a>
                     )}
                   </div>
@@ -215,21 +262,19 @@ export default function Projects() {
         )}
       </div>
 
-      {/* Detail Modal */}
       {selected && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm overflow-y-auto'>
-          <div className='bg-surface-card rounded-[24px] max-w-[640px] w-full mx-4 border border-outline-variant shadow-card overflow-hidden'>
-            {/* Thumbnail */}
-            <div className='relative w-full overflow-hidden rounded-t-[24px] bg-black'>
+        <div className='fixed inset-0 z-50 flex items-start justify-center pt-20 pb-8 px-4 bg-black/40 backdrop-blur-sm overflow-y-auto'>
+          <div className='bg-surface-card rounded-[24px] max-w-[640px] w-full mx-4 border border-outline-variant shadow-card flex flex-col max-h-[calc(100vh-8rem)] overflow-y-auto'>
+            <div className='relative w-full overflow-hidden rounded-t-[24px] bg-black shrink-0'>
               {selected.thumbnail ? (
                 <img
                   src={selected.thumbnail}
                   alt={selected.title}
-                  className='w-full max-h-[320px] object-contain'
+                  className='w-full max-h-[200px] object-contain'
                 />
               ) : (
                 <div
-                  className='w-full h-[220px] flex items-center justify-center'
+                  className='w-full h-[160px] flex items-center justify-center shrink-0'
                   style={{
                     background:
                       selected.gradient ||
@@ -251,7 +296,6 @@ export default function Projects() {
               </button>
             </div>
 
-            {/* Content */}
             <div className='p-8'>
               <div className='flex flex-wrap gap-2 mb-4'>
                 {(selected.tags ?? []).map((tag) => (
@@ -280,7 +324,7 @@ export default function Projects() {
                     className='inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-full text-[0.9rem] font-semibold no-underline transition-all duration-200 hover:bg-primary-accent hover:-translate-y-0.5'
                   >
                     <Icon name='open_in_new' size={18} />
-                    Visit Live Site
+                    {t.projects.visitSite}
                   </a>
                 )}
                 {selected.github_url && (
@@ -291,7 +335,7 @@ export default function Projects() {
                     className='inline-flex items-center gap-2 bg-surface-card text-on-surface px-6 py-3 rounded-full text-[0.9rem] font-semibold no-underline border border-outline-variant transition-all duration-200 hover:bg-surface-low hover:-translate-y-0.5'
                   >
                     <Icon name='github' size={18} />
-                    View on GitHub
+                    {t.projects.viewOnGithub}
                   </a>
                 )}
               </div>

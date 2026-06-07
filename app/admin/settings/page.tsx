@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { revalidatePortfolio } from "../_utils/revalidate";
 import { useToast } from "../_components/Toast";
 import FileUploader from "../_components/FileUploader";
+import TranslatedField from "../_components/TranslatedField";
 import { uploadFile } from "@/lib/supabase/storage";
 
 interface AboutData {
@@ -15,6 +16,10 @@ interface AboutData {
   tagline: string;
   experience: number;
   description: string;
+  name_id?: string | null;
+  expertise_id?: string | null;
+  tagline_id?: string | null;
+  description_id?: string | null;
   photo: string | null;
   cv_url: string | null;
   tools: string[];
@@ -32,12 +37,22 @@ export default function SettingsPage() {
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [photoRemove, setPhotoRemove] = useState(false);
   const [cvRemove, setCvRemove] = useState(false);
+  const [nameId, setNameId] = useState("");
+  const [expertiseId, setExpertiseId] = useState("");
+  const [taglineId, setTaglineId] = useState("");
+  const [descriptionId, setDescriptionId] = useState("");
 
   const supabase = createClient();
 
   const fetchData = useCallback(async () => {
     const { data } = await supabase.from("abouts").select("*").limit(1).single();
-    if (data) setAbout(data);
+    if (data) {
+      setAbout(data);
+      setNameId(data.name_id ?? "");
+      setExpertiseId(data.expertise_id ?? "");
+      setTaglineId(data.tagline_id ?? "");
+      setDescriptionId(data.description_id ?? "");
+    }
     setLoading(false);
   }, []);
 
@@ -68,12 +83,16 @@ export default function SettingsPage() {
       }
 
       const payload = {
-        name: fd.get("name") as string,
+        name: about?.name ?? "",
+        name_id: nameId || null,
         age: parseInt(fd.get("age") as string) || 0,
-        expertise: fd.get("expertise") as string,
-        tagline: fd.get("tagline") as string,
+        expertise: about?.expertise ?? "",
+        expertise_id: expertiseId || null,
+        tagline: about?.tagline ?? "",
+        tagline_id: taglineId || null,
         experience: parseInt(fd.get("experience") as string) || 0,
-        description: fd.get("description") as string,
+        description: about?.description ?? "",
+        description_id: descriptionId || null,
         photo,
         cv_url: cvUrl,
         tools: ((fd.get("tools") as string) || "").split(",").map(t => t.trim()),
@@ -120,21 +139,13 @@ export default function SettingsPage() {
 
       <form onSubmit={handleSave} className="bg-surface-card rounded-[16px] border border-outline-variant p-8 max-w-[800px]">
         <div className="grid grid-cols-2 gap-5 mb-6">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[0.85rem] font-semibold text-on-surface">Name</label>
-            <input name="name" defaultValue={about?.name ?? ""} required
-              className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
-          </div>
+          <TranslatedField label="Name" enValue={about?.name ?? ""} idValue={nameId} onEnChange={(v) => setAbout(prev => prev ? { ...prev, name: v } : null)} onIdChange={setNameId} required />
           <div className="flex flex-col gap-1.5">
             <label className="text-[0.85rem] font-semibold text-on-surface">Age</label>
             <input name="age" type="number" defaultValue={about?.age ?? 0}
               className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[0.85rem] font-semibold text-on-surface">Expertise Badge</label>
-            <input name="expertise" defaultValue={about?.expertise ?? ""}
-              className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
-          </div>
+          <TranslatedField label="Expertise" enValue={about?.expertise ?? ""} idValue={expertiseId} onEnChange={(v) => setAbout(prev => prev ? { ...prev, expertise: v } : null)} onIdChange={setExpertiseId} required />
           <div className="flex flex-col gap-1.5">
             <label className="text-[0.85rem] font-semibold text-on-surface">Experience (years)</label>
             <input name="experience" type="number" defaultValue={about?.experience ?? 0}
@@ -142,17 +153,9 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-1.5 mb-5">
-          <label className="text-[0.85rem] font-semibold text-on-surface">Tagline</label>
-          <input name="tagline" defaultValue={about?.tagline ?? ""}
-            className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full" />
-        </div>
+        <TranslatedField label="Tagline" enValue={about?.tagline ?? ""} idValue={taglineId} onEnChange={(v) => setAbout(prev => prev ? { ...prev, tagline: v } : null)} onIdChange={setTaglineId} />
 
-        <div className="flex flex-col gap-1.5 mb-5">
-          <label className="text-[0.85rem] font-semibold text-on-surface">Description</label>
-          <textarea name="description" defaultValue={about?.description ?? ""} rows={6}
-            className="bg-surface border border-outline-variant rounded-[10px] px-4 py-2.5 text-[0.9rem] text-on-surface outline-none focus:border-primary w-full resize-none" />
-        </div>
+        <TranslatedField label="Description" enValue={about?.description ?? ""} idValue={descriptionId} onEnChange={(v) => setAbout(prev => prev ? { ...prev, description: v } : null)} onIdChange={setDescriptionId} type="textarea" rows={4} />
 
         <div className="grid grid-cols-2 gap-5 mb-5">
           <FileUploader
